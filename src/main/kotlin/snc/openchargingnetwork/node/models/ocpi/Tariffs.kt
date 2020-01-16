@@ -49,7 +49,7 @@ enum class TariffType {
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class TariffElement(@JsonProperty("price_components") val priceComponents: List<PriceComponent>,
-                         @JsonProperty("resttyperictions") val restrictions: TariffRestrictions? = null)
+                         @JsonProperty("restrictions") val restrictions: TariffRestrictions? = null)
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class PriceComponent(@JsonProperty("type") val type: TariffDimensionType,
