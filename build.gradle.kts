@@ -48,6 +48,7 @@ dependencies {
         exclude(module = "junit")
         exclude(module = "mockito-core")
         exclude(module = "android-json")
+        exclude(module = "junit-vintage-engine")
     }
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("com.ninja-squad:springmockk:1.1.2")

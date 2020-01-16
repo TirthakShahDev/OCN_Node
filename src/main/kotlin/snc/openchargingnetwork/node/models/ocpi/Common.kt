@@ -188,6 +188,7 @@ enum class Role {
     CPO,
     EMSP,
     HUB,
+    NAP,
     NSP,
     OTHER,
     SCSP
