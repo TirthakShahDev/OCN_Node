@@ -39,7 +39,8 @@ class OcnRulesController(private val ocnRulesService: OcnRulesService) {
     fun updateWhitelist(@RequestHeader("authorization") authorization: String,
                         @RequestBody body: List<BasicRole>): ResponseEntity<OcpiResponse<Unit>> {
 
-        return ResponseEntity.ok(OcpiResponse(1000))
+        ocnRulesService.updateWhitelist(authorization, body)
+        return ResponseEntity.ok(OcpiResponse(statusCode = 1000))
     }
 
 }

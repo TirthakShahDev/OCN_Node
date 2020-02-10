@@ -2,7 +2,9 @@ package snc.openchargingnetwork.node.controllers.ocpi.v2_2
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ninjasquad.springmockk.MockkBean
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -47,6 +49,9 @@ class OcnRulesControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun updateWhitelist() {
         val body = listOf(BasicRole("ABC", "DE"), BasicRole("DEF", "DE"))
+
+        every { ocnRulesService.updateWhitelist("Token token-c", body) } just Runs
+
         mockMvc.perform(put("/ocpi/receiver/2.2/ocnrules/whitelist")
                 .header("authorization", "Token token-c")
                 .contentType(MediaType.APPLICATION_JSON)

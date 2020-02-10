@@ -5,6 +5,7 @@ import snc.openchargingnetwork.node.models.OcnRules
 import snc.openchargingnetwork.node.models.OcnRulesList
 import snc.openchargingnetwork.node.models.OcnRulesListType
 import snc.openchargingnetwork.node.models.entities.OcnRulesListEntity
+import snc.openchargingnetwork.node.models.exceptions.OcpiClientGenericException
 import snc.openchargingnetwork.node.models.exceptions.OcpiClientInvalidParametersException
 import snc.openchargingnetwork.node.models.ocpi.BasicRole
 import snc.openchargingnetwork.node.repositories.OcnRulesListRepository
@@ -31,6 +32,30 @@ class OcnRulesService(private val platformRepository: PlatformRepository,
                         list = extractList(rulesList, OcnRulesListType.BLACKLIST)
                 )
         )
+    }
+
+    fun updateWhitelist(authorization: String, body: List<BasicRole>) {
+        // 1. check token C
+        val platform = platformRepository.findByAuth_TokenC(authorization.extractToken())
+                ?: throw OcpiClientInvalidParametersException("Invalid CREDENTIALS_TOKEN_C")
+
+        // 2. check blacklist inactive
+        if (platform.rules.blacklist) {
+            throw OcpiClientGenericException("OCN Rules whitelist and blacklist cannot be active at same time.")
+        }
+
+        // 4. set whitelist to active
+        platform.rules.whitelist = true
+
+        // 5. save whitelist option
+        platformRepository.save(platform)
+
+        // 6. re-apply whitelist
+        ocnRulesListRepository.deleteByPlatformID(platform.id)
+        ocnRulesListRepository.saveAll(body.map { OcnRulesListEntity(
+                platformID = platform.id!!,
+                type = OcnRulesListType.WHITELIST,
+                counterparty = it) })
     }
 
     private fun extractList(rules: Iterable<OcnRulesListEntity>, type: OcnRulesListType): List<BasicRole> {
