@@ -1,7 +1,6 @@
 package snc.openchargingnetwork.node.services
 
 import org.springframework.stereotype.Service
-import snc.openchargingnetwork.node.config.NodeProperties
 import snc.openchargingnetwork.node.models.OcnRules
 import snc.openchargingnetwork.node.models.OcnRulesList
 import snc.openchargingnetwork.node.models.OcnRulesListType
@@ -14,13 +13,7 @@ import snc.openchargingnetwork.node.tools.extractToken
 
 @Service
 class OcnRulesService(private val platformRepository: PlatformRepository,
-                      private val ocnRulesListRepository: OcnRulesListRepository,
-                      properties: NodeProperties) {
-
-    private val emptyRules = OcnRules(
-            signatures = properties.signatures,
-            whitelist = OcnRulesList(false, listOf()),
-            blacklist = OcnRulesList(false, listOf()))
+                      private val ocnRulesListRepository: OcnRulesListRepository) {
 
     fun getRules(authorization: String): OcnRules {
         val platform = platformRepository.findByAuth_TokenC(authorization.extractToken())

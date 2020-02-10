@@ -54,4 +54,5 @@ interface ProxyResourceRepository: CrudRepository<ProxyResourceEntity, Long> {
 
 interface OcnRulesListRepository: CrudRepository<OcnRulesListEntity, Long> {
     fun findAllByPlatformID(platformID: Long?): Iterable<OcnRulesListEntity>
+    fun deleteByPlatformID(platformID: Long?)
 }

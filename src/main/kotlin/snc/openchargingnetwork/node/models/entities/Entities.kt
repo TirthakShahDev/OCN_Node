@@ -57,9 +57,9 @@ class Auth(var tokenA: String? = generateUUIDv4Token(),
            var tokenC: String? = null)
 
 @Embeddable
-class OcnRules(val signatures: Boolean = false,
-               val blacklist: Boolean = false,
-               val whitelist: Boolean = false)
+class OcnRules(var signatures: Boolean = false,
+               var blacklist: Boolean = false,
+               var whitelist: Boolean = false)
 
 /**
  * Store a role linked to an OCPI platform (i.e. a platform can implement both EMSP and CPO roles)
