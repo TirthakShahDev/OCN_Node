@@ -51,3 +51,7 @@ interface ProxyResourceRepository: CrudRepository<ProxyResourceEntity, Long> {
     fun findByIdAndSenderAndReceiver(id: Long?, sender: BasicRole, receiver: BasicRole): ProxyResourceEntity?
     fun findByAlternativeUIDAndSenderAndReceiver(alternativeUID: String, sender: BasicRole, receiver: BasicRole): ProxyResourceEntity?
 }
+
+interface OcnRulesListRepository: CrudRepository<OcnRulesListEntity, Long> {
+    fun findAllByPlatformID(platformID: Long?): Iterable<OcnRulesListEntity>
+}
