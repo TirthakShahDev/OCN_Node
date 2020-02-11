@@ -36,6 +36,14 @@ class OcnRulesController(private val ocnRulesService: OcnRulesService) {
     }
 
     @Transactional
+    @PutMapping("/ocpi/receiver/2.2/ocnrules/signatures")
+    fun updateSignatures(@RequestHeader("authorization") authorization: String): ResponseEntity<OcpiResponse<Unit>> {
+
+        ocnRulesService.updateSignatures(authorization)
+        return ResponseEntity.ok(OcpiResponse(statusCode = 1000))
+    }
+
+    @Transactional
     @PutMapping("/ocpi/receiver/2.2/ocnrules/whitelist")
     fun updateWhitelist(@RequestHeader("authorization") authorization: String,
                         @RequestBody body: List<BasicRole>): ResponseEntity<OcpiResponse<Unit>> {

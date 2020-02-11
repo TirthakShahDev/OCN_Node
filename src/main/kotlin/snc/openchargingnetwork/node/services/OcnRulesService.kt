@@ -1,3 +1,19 @@
+/*
+    Copyright 2019-2020 eMobilify GmbH
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
 package snc.openchargingnetwork.node.services
 
 import org.springframework.stereotype.Service
@@ -15,14 +31,13 @@ import snc.openchargingnetwork.node.tools.extractToken
 
 
 @Service
-class OcnRulesService(private val platformRepository: PlatformRepository,
-                      private val ocnRulesListRepository: OcnRulesListRepository) {
+class OcnRulesService(private val platformRepo: PlatformRepository,
+                      private val ocnRulesListRepo: OcnRulesListRepository) {
 
     fun getRules(authorization: String): OcnRules {
-        val platform = platformRepository.findByAuth_TokenC(authorization.extractToken())
-                ?: throw OcpiClientInvalidParametersException("Invalid CREDENTIALS_TOKEN_C")
+        val platform = findPlatform(authorization)
 
-        val rulesList = ocnRulesListRepository.findAllByPlatformID(platform.id).map { it.counterparty }
+        val rulesList = ocnRulesListRepo.findAllByPlatformID(platform.id).map { it.counterparty }
 
         return OcnRules(
                 signatures = platform.rules.signatures,
@@ -38,6 +53,12 @@ class OcnRulesService(private val platformRepository: PlatformRepository,
                             true -> rulesList
                             false -> listOf()
                         }))
+    }
+
+    fun updateSignatures(authorization: String) {
+        val platform = findPlatform(authorization)
+        platform.rules.signatures = !platform.rules.signatures
+        platformRepo.save(platform)
     }
 
     fun updateWhitelist(authorization: String, parties: List<BasicRole>) {
@@ -57,11 +78,11 @@ class OcnRulesService(private val platformRepository: PlatformRepository,
         }
 
         // 3. save whitelist option
-        platformRepository.save(platform)
+        platformRepo.save(platform)
 
         // 4. re-apply whitelist
-        ocnRulesListRepository.deleteByPlatformID(platform.id)
-        ocnRulesListRepository.saveAll(parties.map { OcnRulesListEntity(
+        ocnRulesListRepo.deleteByPlatformID(platform.id)
+        ocnRulesListRepo.saveAll(parties.map { OcnRulesListEntity(
             platformID = platform.id!!,
             counterparty = it.toUpperCase()) })
     }
@@ -77,15 +98,15 @@ class OcnRulesService(private val platformRepository: PlatformRepository,
         platform.rules.whitelist = true
 
         // 4. check entry does not already exist
-        if (ocnRulesListRepository.existsByCounterparty(body.toUpperCase())) {
+        if (ocnRulesListRepo.existsByCounterparty(body.toUpperCase())) {
             throw OcpiClientInvalidParametersException("Party already on OCN Rules whitelist")
         }
 
         // 5. save whitelist option
-        platformRepository.save(platform)
+        platformRepo.save(platform)
 
         // 6. add to whitelist
-        ocnRulesListRepository.save(OcnRulesListEntity(
+        ocnRulesListRepo.save(OcnRulesListEntity(
                 platformID = platform.id!!,
                 counterparty = body))
     }
@@ -100,11 +121,11 @@ class OcnRulesService(private val platformRepository: PlatformRepository,
         }
 
         // 3. delete entry
-        ocnRulesListRepository.deleteByPlatformIDAndCounterparty(platform.id, party)
+        ocnRulesListRepo.deleteByPlatformIDAndCounterparty(platform.id, party)
     }
 
     private fun findPlatform(authorization: String): PlatformEntity {
-        return platformRepository.findByAuth_TokenC(authorization.extractToken())
+        return platformRepo.findByAuth_TokenC(authorization.extractToken())
                 ?: throw OcpiClientInvalidParametersException("Invalid CREDENTIALS_TOKEN_C")
     }
 
