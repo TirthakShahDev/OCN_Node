@@ -16,6 +16,7 @@
 
 package snc.openchargingnetwork.node.services
 
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
 import snc.openchargingnetwork.node.config.NodeProperties
@@ -32,6 +33,8 @@ import snc.openchargingnetwork.node.tools.extractToken
 import snc.openchargingnetwork.node.tools.generateUUIDv4Token
 import snc.openchargingnetwork.node.tools.urlJoin
 import snc.openchargingnetwork.contracts.RegistryFacade
+import snc.openchargingnetwork.node.models.entities.OcnRules
+import snc.openchargingnetwork.node.models.entities.PlatformEntity
 import java.lang.Exception
 
 @Service
@@ -82,6 +85,16 @@ class RoutingService(private val platformRepo: PlatformRepository,
     fun getPlatformID(role: BasicRole): Long {
         return roleRepo.findByCountryCodeAndPartyIDAllIgnoreCase(role.country, role.id)?.platformID
                 ?: throw OcpiHubUnknownReceiverException("Could not find platform ID of $role")
+    }
+
+    /**
+     * get the rules (signature, white/blacklist) implemented by a role/platform
+     */
+    fun getPlatformRules(role: BasicRole): OcnRules {
+        val platformID = roleRepo.findByCountryCodeAndPartyIDAllIgnoreCase(role.country, role.id)?.platformID
+                ?: throw OcpiHubUnknownReceiverException("Could not find platform ID of $role")
+        return platformRepo.findByIdOrNull(platformID)?.rules
+                ?: throw IllegalStateException("Platform with id=$platformID does not exist, but has roles.")
     }
 
 

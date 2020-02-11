@@ -17,13 +17,13 @@
 package snc.openchargingnetwork.node.controllers.ocpi.v2_2
 
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import snc.openchargingnetwork.node.models.OcnRules
-import snc.openchargingnetwork.node.models.OcnRulesList
 import snc.openchargingnetwork.node.models.ocpi.BasicRole
 import snc.openchargingnetwork.node.models.ocpi.OcpiResponse
 import snc.openchargingnetwork.node.services.OcnRulesService
-import snc.openchargingnetwork.node.services.RoutingService
+
 
 @RestController
 class OcnRulesController(private val ocnRulesService: OcnRulesService) {
@@ -35,6 +35,7 @@ class OcnRulesController(private val ocnRulesService: OcnRulesService) {
                 data = ocnRulesService.getRules(authorization)))
     }
 
+    @Transactional
     @PutMapping("/ocpi/receiver/2.2/ocnrules/whitelist")
     fun updateWhitelist(@RequestHeader("authorization") authorization: String,
                         @RequestBody body: List<BasicRole>): ResponseEntity<OcpiResponse<Unit>> {
@@ -43,4 +44,25 @@ class OcnRulesController(private val ocnRulesService: OcnRulesService) {
         return ResponseEntity.ok(OcpiResponse(statusCode = 1000))
     }
 
+    @Transactional
+    @PostMapping("/ocpi/receiver/2.2/ocnrules/whitelist/{countryCode}/{partyID}")
+    fun appendToWhitelist(@RequestHeader("authorization") authorization: String,
+                          @PathVariable countryCode: String,
+                          @PathVariable partyID: String): ResponseEntity<OcpiResponse<Unit>> {
+
+        val party = BasicRole(country = countryCode, id = partyID).toUpperCase()
+        ocnRulesService.appendToWhitelist(authorization, party)
+        return ResponseEntity.ok(OcpiResponse(statusCode = 1000))
+    }
+
+    @Transactional
+    @DeleteMapping("ocpi/receiver/2.2/ocnrules/whitelist/{countryCode}/{partyID}")
+    fun deleteFromWhitelist(@RequestHeader("authorization") authorization: String,
+                            @PathVariable countryCode: String,
+                            @PathVariable partyID: String): ResponseEntity<OcpiResponse<Unit>> {
+
+        val party = BasicRole(country = countryCode, id = partyID).toUpperCase()
+        ocnRulesService.deleteFromWhitelist(authorization, party)
+        return ResponseEntity.ok(OcpiResponse(statusCode = 1000))
+    }
 }

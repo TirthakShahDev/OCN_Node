@@ -10,8 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import snc.openchargingnetwork.node.models.OcnRules
 import snc.openchargingnetwork.node.models.OcnRulesList
@@ -60,7 +59,39 @@ class OcnRulesControllerTest(@Autowired val mockMvc: MockMvc) {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("\$.status_code").value(1000))
                 .andExpect(jsonPath("\$.status_message").doesNotExist())
-                .andExpect(jsonPath("\$.data.signatures").doesNotExist())
+                .andExpect(jsonPath("\$.data").doesNotExist())
+                .andExpect(jsonPath("\$.timestamp").isString)
+    }
+
+    @Test
+    fun appendToWhitelist() {
+        val party = BasicRole("ABC", "DE")
+
+        every { ocnRulesService.appendToWhitelist("Token token-c", party) } just Runs
+
+        mockMvc.perform(post("/ocpi/receiver/2.2/ocnrules/whitelist/de/abc")
+                .header("authorization", "Token token-c"))
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("\$.status_code").value(1000))
+                .andExpect(jsonPath("\$.status_message").doesNotExist())
+                .andExpect(jsonPath("\$.data").doesNotExist())
+                .andExpect(jsonPath("\$.timestamp").isString)
+    }
+
+    @Test
+    fun deleteFromWhitelist() {
+        val party = BasicRole("ABC", "DE")
+
+        every { ocnRulesService.deleteFromWhitelist("Token token-c", party) } just Runs
+
+        mockMvc.perform(delete("/ocpi/receiver/2.2/ocnrules/whitelist/de/abc")
+                .header("authorization", "Token token-c"))
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("\$.status_code").value(1000))
+                .andExpect(jsonPath("\$.status_message").doesNotExist())
+                .andExpect(jsonPath("\$.data").doesNotExist())
                 .andExpect(jsonPath("\$.timestamp").isString)
     }
 

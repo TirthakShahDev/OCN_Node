@@ -116,7 +116,6 @@ class ProxyResourceEntity(
 @Table(name = "ocn_rules_list")
 class OcnRulesListEntity(
         val platformID: Long,
-        @Enumerated(EnumType.STRING) val type: OcnRulesListType,
 
         @AttributeOverrides(
                 AttributeOverride(name = "id", column = Column(name ="sender_id")),

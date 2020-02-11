@@ -41,6 +41,10 @@ data class BasicRole(@JsonProperty("party_id") final val id: String,
             throw OcpiClientInvalidParametersException("Given party-id \"$id\" not 3 characters")
         }
     }
+
+    fun toUpperCase(): BasicRole {
+        return BasicRole(id = id.toUpperCase(), country = country.toUpperCase())
+    }
 }
 
 
