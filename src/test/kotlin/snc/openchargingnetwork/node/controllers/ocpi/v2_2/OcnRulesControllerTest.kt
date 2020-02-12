@@ -64,6 +64,24 @@ class OcnRulesControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
+    fun updateBlacklist() {
+        val body = listOf(BasicRole("ABC","DE"), BasicRole("DEF","DE"))
+
+        every { ocnRulesService.updateBlacklist("Token token-c", body) } just Runs
+
+        mockMvc.perform(put("/ocpi/receiver/2.2/ocnrules/blacklist")
+                .header("authorization", "Token token-c")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jacksonObjectMapper().writeValueAsString(body)))
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("\$.status_code").value(1000))
+                .andExpect(jsonPath("\$.status_message").doesNotExist())
+                .andExpect(jsonPath("\$.data").doesNotExist())
+                .andExpect(jsonPath("\$.timestamp").isString)
+    }
+
+    @Test
     fun appendToWhitelist() {
         val party = BasicRole("ABC", "DE")
 
@@ -80,12 +98,44 @@ class OcnRulesControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
+    fun appendToBlacklist() {
+        val party = BasicRole("ABC","DE")
+
+        every { ocnRulesService.appendToBlacklist("Token token-c", party) } just Runs
+
+        mockMvc.perform(post("/ocpi/receiver/2.2/ocnrules/blacklist/de/abc")
+                .header("authorization", "Token token-c"))
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("\$.status_code").value(1000))
+                .andExpect(jsonPath("\$.status_message").doesNotExist())
+                .andExpect(jsonPath("\$.data").doesNotExist())
+                .andExpect(jsonPath("\$.timestamp").isString)
+    }
+
+    @Test
     fun deleteFromWhitelist() {
         val party = BasicRole("ABC", "DE")
 
         every { ocnRulesService.deleteFromWhitelist("Token token-c", party) } just Runs
 
         mockMvc.perform(delete("/ocpi/receiver/2.2/ocnrules/whitelist/de/abc")
+                .header("authorization", "Token token-c"))
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("\$.status_code").value(1000))
+                .andExpect(jsonPath("\$.status_message").doesNotExist())
+                .andExpect(jsonPath("\$.data").doesNotExist())
+                .andExpect(jsonPath("\$.timestamp").isString)
+    }
+
+    @Test
+    fun deleteFromBlacklist() {
+        val party = BasicRole("ABC","DE")
+
+        every { ocnRulesService.deleteFromBlacklist("Token token-c", party) } just Runs
+
+        mockMvc.perform(delete("/ocpi/receiver/2.2/ocnrules/blacklist/de/abc")
                 .header("authorization", "Token token-c"))
                 .andExpect(status().isOk)
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

@@ -53,6 +53,15 @@ class OcnRulesController(private val ocnRulesService: OcnRulesService) {
     }
 
     @Transactional
+    @PutMapping("/ocpi/receiver/2.2/ocnrules/blacklist")
+    fun updateBlacklist(@RequestHeader("authorization") authorization: String,
+                        @RequestBody body: List<BasicRole>): ResponseEntity<OcpiResponse<Unit>> {
+
+        ocnRulesService.updateBlacklist(authorization, body)
+        return ResponseEntity.ok(OcpiResponse(statusCode = 1000))
+    }
+
+    @Transactional
     @PostMapping("/ocpi/receiver/2.2/ocnrules/whitelist/{countryCode}/{partyID}")
     fun appendToWhitelist(@RequestHeader("authorization") authorization: String,
                           @PathVariable countryCode: String,
@@ -64,6 +73,16 @@ class OcnRulesController(private val ocnRulesService: OcnRulesService) {
     }
 
     @Transactional
+    @PostMapping("/ocpi/receiver/2.2/ocnrules/blacklist/{countryCode}/{partyID}")
+    fun appendToBlacklist(@RequestHeader("authorization") authorization: String,
+                          @PathVariable countryCode: String,
+                          @PathVariable partyID: String): ResponseEntity<OcpiResponse<Unit>> {
+        val party = BasicRole(country = countryCode, id = partyID).toUpperCase()
+        ocnRulesService.appendToBlacklist(authorization, party)
+        return ResponseEntity.ok(OcpiResponse(statusCode = 1000))
+    }
+
+    @Transactional
     @DeleteMapping("ocpi/receiver/2.2/ocnrules/whitelist/{countryCode}/{partyID}")
     fun deleteFromWhitelist(@RequestHeader("authorization") authorization: String,
                             @PathVariable countryCode: String,
@@ -71,6 +90,17 @@ class OcnRulesController(private val ocnRulesService: OcnRulesService) {
 
         val party = BasicRole(country = countryCode, id = partyID).toUpperCase()
         ocnRulesService.deleteFromWhitelist(authorization, party)
+        return ResponseEntity.ok(OcpiResponse(statusCode = 1000))
+    }
+
+    @Transactional
+    @DeleteMapping("ocpi/receiver/2.2/ocnrules/blacklist/{countryCode}/{partyID}")
+    fun deleteFromBlacklist(@RequestHeader("authorization") authorization: String,
+                            @PathVariable countryCode: String,
+                            @PathVariable partyID: String): ResponseEntity<OcpiResponse<Unit>> {
+
+        val party = BasicRole(country = countryCode, id = partyID).toUpperCase()
+        ocnRulesService.deleteFromBlacklist(authorization, party)
         return ResponseEntity.ok(OcpiResponse(statusCode = 1000))
     }
 }
