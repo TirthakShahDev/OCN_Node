@@ -141,7 +141,7 @@ class OcnRulesService(private val platformRepo: PlatformRepository,
         // 1. check token C/ find platform
         val platform = findPlatform(authorization)
 
-        // 2. check whitelist is active
+        // 2. check whitelist active
         assertListNotActive(platform, OcnRulesListType.WHITELIST)
 
         // 3. set blacklist to true
