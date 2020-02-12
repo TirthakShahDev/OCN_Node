@@ -87,6 +87,32 @@ class OcnRulesService(private val platformRepo: PlatformRepository,
             counterparty = it.toUpperCase()) })
     }
 
+    fun updateBlacklist(authorization: String, parties: List<BasicRole>) {
+        // 1. check token C / find platform
+        val platform = findPlatform(authorization)
+
+        // 2. determine whether blacklist is active
+        platform.rules.blacklist = when (parties.count()) {
+            // set to false if provided list is empty (delete list)
+            0 -> false
+            else -> {
+                // 2.1 check whitelist is active
+                assertListNotActive(platform, OcnRulesListType.WHITELIST)
+                // set true if list is not empty
+                true
+            }
+        }
+
+        // 3. save blacklist option
+        platformRepo.save(platform)
+
+        // 4. re-apply whitelist
+        ocnRulesListRepo.deleteByPlatformID(platform.id)
+        ocnRulesListRepo.saveAll(parties.map { OcnRulesListEntity(
+                platformID = platform.id!!,
+                counterparty = it.toUpperCase()) })
+    }
+
     fun appendToWhitelist(authorization: String, body: BasicRole) {
         // 1. check token C / find platform
         val platform = findPlatform(authorization)
@@ -111,6 +137,31 @@ class OcnRulesService(private val platformRepo: PlatformRepository,
                 counterparty = body))
     }
 
+    fun appendToBlacklist (authorization: String, body: BasicRole) {
+        // 1. check token C/ find platform
+        val platform = findPlatform(authorization)
+
+        // 2. check whitelist is active
+        assertListNotActive(platform, OcnRulesListType.WHITELIST)
+
+        // 3. set blacklist to true
+        platform.rules.blacklist = true
+
+        // 4. check entry does not already exist
+        if (ocnRulesListRepo.existsByCounterparty(body.toUpperCase())) {
+            throw OcpiClientInvalidParametersException("Party already on OCN Rules blacklist")
+        }
+
+        // 5. save blacklist option
+        platformRepo.save(platform)
+
+        // 6. add to blacklist
+        ocnRulesListRepo.save(OcnRulesListEntity(
+                platformID = platform.id!!,
+                counterparty = body
+        ))
+    }
+
     fun deleteFromWhitelist(authorization: String, party: BasicRole) {
         // 1. check token C / find platform
         val platform = findPlatform(authorization)
@@ -118,6 +169,19 @@ class OcnRulesService(private val platformRepo: PlatformRepository,
         // 2. check whitelist/blacklist activeness
         if (platform.rules.blacklist || !platform.rules.whitelist) {
             throw OcpiClientGenericException("Cannot delete entry from OCN Rules whitelist")
+        }
+
+        // 3. delete entry
+        ocnRulesListRepo.deleteByPlatformIDAndCounterparty(platform.id, party)
+    }
+
+    fun deleteFromBlacklist(authorization: String, party: BasicRole) {
+        // 1. check token C / find platform
+        val platform = findPlatform(authorization)
+
+        // 2. check blacklist/whitelist activeness
+        if (platform.rules.whitelist || !platform.rules.blacklist) {
+            throw OcpiClientGenericException("Cannot delete entry from OCN Rules blacklist")
         }
 
         // 3. delete entry
