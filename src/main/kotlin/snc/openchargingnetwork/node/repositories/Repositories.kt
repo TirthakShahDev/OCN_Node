@@ -19,6 +19,7 @@ package snc.openchargingnetwork.node.repositories
 import org.springframework.data.repository.CrudRepository
 import snc.openchargingnetwork.node.models.entities.*
 import snc.openchargingnetwork.node.models.ocpi.BasicRole
+import snc.openchargingnetwork.node.models.ocpi.ConnectionStatus
 import snc.openchargingnetwork.node.models.ocpi.InterfaceRole
 
 interface PlatformRepository: CrudRepository<PlatformEntity, Long> {
@@ -26,6 +27,7 @@ interface PlatformRepository: CrudRepository<PlatformEntity, Long> {
     fun existsByAuth_TokenC(tokenC: String?): Boolean
     fun findByAuth_TokenA(tokenA: String?): PlatformEntity?
     fun findByAuth_TokenC(tokenC: String?): PlatformEntity?
+    fun findByStatusIn(connectionStatusList: List<ConnectionStatus>): Iterable<PlatformEntity>
 }
 
 interface RoleRepository: CrudRepository<RoleEntity, Long> {

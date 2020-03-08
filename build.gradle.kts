@@ -56,6 +56,7 @@ dependencies {
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc:2.0.3.RELEASE")
     testImplementation("io.javalin:javalin:3.7.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
+    testImplementation("org.awaitility:awaitility-kotlin:4.0.2")
 }
 
 allOpen {

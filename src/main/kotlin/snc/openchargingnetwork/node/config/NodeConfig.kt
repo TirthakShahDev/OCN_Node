@@ -17,6 +17,7 @@
 package snc.openchargingnetwork.node.config
 
 import org.springframework.boot.ApplicationRunner
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.web3j.protocol.Web3j
@@ -26,6 +27,7 @@ import org.web3j.tx.TransactionManager
 import org.web3j.tx.gas.StaticGasProvider
 import snc.openchargingnetwork.node.repositories.*
 import snc.openchargingnetwork.contracts.Registry
+import snc.openchargingnetwork.node.scheduledTasks.HubClientInfoStillAliveCheck
 
 
 @Configuration
@@ -51,4 +53,9 @@ open class NodeConfig(private val properties: NodeProperties) {
         )
     }
 
+    @Bean
+    @ConditionalOnProperty(value = ["ocn.node.stillAliveEnabled"], matchIfMissing = false, havingValue = "true")
+    fun hubClientInfoStillAliveCheck(platformRepo: PlatformRepository, httpService: snc.openchargingnetwork.node.services.HttpService): HubClientInfoStillAliveCheck {
+        return HubClientInfoStillAliveCheck(httpService, platformRepo, properties)
+    }
 }

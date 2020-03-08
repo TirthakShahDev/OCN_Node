@@ -70,4 +70,8 @@ open class PartyServer(private val credentials: KeyPair, private val party: Basi
                 toPartyId = to.id)
     }
 
+    fun stopServer() {
+        app.stop()
+    }
+
 }

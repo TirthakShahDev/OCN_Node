@@ -2,15 +2,14 @@ package snc.openchargingnetwork.node.integration
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.web3j.crypto.Credentials
 import shareandcharge.openchargingnetwork.notary.Notary
 import shareandcharge.openchargingnetwork.notary.SignableHeaders
 import shareandcharge.openchargingnetwork.notary.ValuesToSign
 import snc.openchargingnetwork.node.data.exampleCDR
 import snc.openchargingnetwork.node.data.exampleLocation1
-import snc.openchargingnetwork.node.integration.parties.CpoServer
 import snc.openchargingnetwork.node.integration.parties.MspServer
 import snc.openchargingnetwork.node.models.ocpi.*
 import snc.openchargingnetwork.node.tools.extractNextLink
@@ -19,55 +18,24 @@ import java.lang.Thread.sleep
 
 class IntegrationTest {
 
+    private lateinit var networkComponents: NetworkComponents
     private lateinit var mspServer: MspServer
-    private lateinit var cpoServer1: CpoServer
-    private lateinit var cpoServer2: CpoServer
-
-    private lateinit var msp: Credentials
+    private lateinit var msp: MspTestCase
     private lateinit var cpos: List<CpoTestCase>
+
+    private val hubClientInfoParams = HubClientInfoParams(stillAliveEnabled = false, stillAliveRate = 1000)
 
     @BeforeAll
     fun bootStrap() {
-        // REGISTRY CONTRACT
-        val registry = deployRegistry()
+        networkComponents = setupNetwork(hubClientInfoParams)
+        msp = networkComponents.msps.first()
+        mspServer = msp.server
+        cpos = networkComponents.cpos
+    }
 
-        // NODE 1 = http://localhost:8080
-        val node1 = Credentials.create("0xae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f")
-        setUpNode(registry.contractAddress, node1, 8080)
-
-        // NODE 2 = http://localhost:8081
-        val node2 = Credentials.create("0x0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1")
-        setUpNode(registry.contractAddress, node2, 8081)
-
-        // CPO 1
-        val cpo1 = Credentials.create("0xc88b703fb08cbea894b6aeff5a544fb92e78a18e19814cd85da83b71f772aa6c")
-        cpoServer1 = CpoServer(cpo1, BasicRole("CPA", "CH"), 8100)
-        cpoServer1.setPartyInRegistry(registry.contractAddress, node1.address)
-        cpoServer1.registerCredentials()
-
-        // CPO 2
-        val cpo2 = Credentials.create("0x388c684f0ba1ef5017716adb5d21a053ea8e90277d0868337519f97bede61418")
-        cpoServer2 = CpoServer(cpo2, BasicRole("CPB", "CH"), 8101)
-        cpoServer2.setPartyInRegistry(registry.contractAddress, node2.address)
-        cpoServer2.registerCredentials()
-
-        // MSP
-        msp = Credentials.create("0x659cbb0e2411a44db63778987b1e22153c086a95eb6b18bdf89de078917abc63")
-        mspServer = MspServer(msp, BasicRole("MSP", "DE"), 8200)
-        mspServer.setPartyInRegistry(registry.contractAddress, node1.address)
-        mspServer.registerCredentials()
-
-        cpos = listOf(
-                CpoTestCase(
-                        party = BasicRole("CPA", "CH"),
-                        address = cpo1.address,
-                        operator = node1.address,
-                        server = cpoServer1),
-                CpoTestCase(
-                        party = BasicRole("CPB", "CH"),
-                        address = cpo2.address,
-                        operator = node2.address,
-                        server = cpoServer2))
+    @AfterAll
+    fun stopTestParties() {
+        stopPartyServers(networkComponents)
     }
 
     @Test
@@ -201,7 +169,7 @@ class IntegrationTest {
             // check signed by correct entity (sender's node is the modifier of the location header)
             assertThat(sig.signatory.checksum()).isEqualTo(cpo.operator.checksum())
             assertThat(sig.rewrites.size).isEqualTo(1)
-            assertThat(sig.rewrites[0].signatory.checksum()).isEqualTo(msp.address.checksum())
+            assertThat(sig.rewrites[0].signatory.checksum()).isEqualTo(msp.credentials.address.checksum())
 
             // verify signature matches response
             val verifyResult = sig.verify(signedValues)
@@ -257,5 +225,4 @@ class IntegrationTest {
             }
         }
     }
-
 }

@@ -197,6 +197,7 @@ class CredentialsControllerTest(@Autowired val mockMvc: MockMvc) {
         val platform = PlatformEntity(id = 3L, auth = Auth(tokenA = null, tokenB = "123", tokenC = "456"))
         every { platformRepo.findByAuth_TokenC(platform.auth.tokenC) } returns platform
         every { platformRepo.deleteById(platform.id!!) } just Runs
+        every { platformRepo.save(platform) } returns platform
         every { roleRepo.findAllByPlatformID(platform.id) } returns listOf<RoleEntity>()
         every { roleRepo.deleteByPlatformID(platform.id) } just Runs
         every { endpointRepo.deleteByPlatformID(platform.id) } just Runs

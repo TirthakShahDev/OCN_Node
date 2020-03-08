@@ -2,9 +2,6 @@ package snc.openchargingnetwork.node.integration.parties
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import khttp.responses.Response
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import shareandcharge.openchargingnetwork.notary.Notary
 import shareandcharge.openchargingnetwork.notary.SignableHeaders
 import shareandcharge.openchargingnetwork.notary.ValuesToSign
@@ -17,6 +14,8 @@ import snc.openchargingnetwork.node.integration.toMap
 import snc.openchargingnetwork.node.models.ocpi.*
 
 class CpoServer(private val credentials: KeyPair, party: BasicRole, val port: Int): PartyServer(credentials, party, port) {
+
+    val hubClientInfoStatuses =  mutableMapOf<BasicRole, ConnectionStatus>()
 
     init {
         app.get("/ocpi/versions/2.2") {
@@ -31,6 +30,10 @@ class CpoServer(private val credentials: KeyPair, party: BasicRole, val port: In
                                     identifier = "locations",
                                     role = InterfaceRole.SENDER,
                                     url = urlBuilder("/ocpi/cpo/2.2/locations")),
+                            Endpoint(
+                                    identifier = "hubclientinfo",
+                                    role = InterfaceRole.RECEIVER,
+                                    url = urlBuilder("/ocpi/cpo/2.2/clientinfo")),
                             Endpoint(
                                     identifier = "commands",
                                     role = InterfaceRole.RECEIVER,
@@ -77,6 +80,13 @@ class CpoServer(private val credentials: KeyPair, party: BasicRole, val port: In
             val asyncJson: Map<String, Any?> = objectMapper.readValue(objectMapper.writeValueAsString(asyncBody))
             khttp.post(url, headers = asyncHeaders.toMap(tokenC, asyncSignature), json = asyncJson)
 
+            it.json(body)
+        }
+
+        app.put("ocpi/cpo/2.2/clientinfo/:countryCode/:partyID") {
+            this.hubClientInfoStatuses[BasicRole(id = it.pathParam("partyID"), country = it.pathParam("countryCode"))] = it.body<ClientInfo>().status
+            val body = OcpiResponse(statusCode = 1000, data = "")
+            body.signature = Notary().sign(ValuesToSign(body = body), credentials.privateKey()).serialize()
             it.json(body)
         }
 

@@ -44,4 +44,8 @@ class NodeProperties {
             lateinit var registry: String
         }
     }
+
+    lateinit var stillAliveRate: String
+
+    var stillAliveEnabled: Boolean = false
 }

@@ -121,6 +121,7 @@ class CredentialsController(private val platformRepo: PlatformRepository,
                     countryCode = role.countryCode))
         }
 
+        platform.register(roles)
         platformRepo.save(platform)
         roleRepo.saveAll(roles)
 
@@ -207,6 +208,10 @@ class CredentialsController(private val platformRepo: PlatformRepository,
 
         val platform = platformRepo.findByAuth_TokenC(authorization.extractToken())
                 ?: throw OcpiClientInvalidParametersException("Invalid CREDENTIALS_TOKEN_C")
+
+        val roles = roleRepo.findAllByPlatformID(platform.id)
+        platform.unregister(roles)
+        platformRepo.save(platform)
 
         platformRepo.deleteById(platform.id!!)
         roleRepo.deleteByPlatformID(platform.id)

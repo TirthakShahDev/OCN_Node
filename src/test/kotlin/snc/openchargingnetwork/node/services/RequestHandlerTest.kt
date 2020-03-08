@@ -23,9 +23,10 @@ class RequestHandlerTest {
     private val routingService: RoutingService = mockk()
     private val httpService: HttpService = mockk()
     private val walletService: WalletService = mockk()
+    private val hubClientInfoService: HubClientInfoService = mockk()
     private val properties: NodeProperties = mockk()
 
-    private val requestHandlerBuilder = RequestHandlerBuilder(routingService, httpService, walletService, properties)
+    private val requestHandlerBuilder = RequestHandlerBuilder(routingService, httpService, walletService, hubClientInfoService, properties)
 
     @Test
     fun validateSender() {
@@ -108,6 +109,8 @@ class RequestHandlerTest {
         every { routingService.getPlatformRules(any()) } returns OcnRules(signatures = false)
         every { routingService.prepareLocalPlatformRequest(variables, false) } returns Pair(recipientUrl, outgoingHeaders)
         every { httpService.makeOcpiRequest<Unit>(recipientUrl, outgoingHeaders, variables) } returns expectedResponse
+        every { hubClientInfoService.renewClientConnection(variables.headers.sender) } just Runs
+        every { hubClientInfoService.renewClientConnection(variables.headers.receiver) } just Runs
 
         val response = requestHandler.forwardRequest().getResponse()
         assertEquals(expectedResponse.statusCode, response.statusCodeValue)
@@ -194,6 +197,8 @@ class RequestHandlerTest {
         every { properties.signatures } returns false
         every { routingService.prepareRemotePlatformRequest(variables, false) } returns Triple(recipientUrl, outgoingHeaders, outgoingBody)
         every { httpService.postOcnMessage<Unit>(recipientUrl, outgoingHeaders, outgoingBody) } returns expectedResponse
+        every { hubClientInfoService.renewClientConnection(variables.headers.sender) } just Runs
+        every { hubClientInfoService.renewClientConnection(variables.headers.receiver) } just Runs
 
         val response = requestHandler.forwardRequest().getResponse()
         assertEquals(expectedResponse.statusCode, response.statusCodeValue)
