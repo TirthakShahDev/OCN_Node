@@ -57,6 +57,11 @@ open class PartyServer(private val credentials: KeyPair, private val party: Basi
         tokenC = response.jsonObject.getJSONObject("data").getString("token")
     }
 
+    fun deleteCredentials() {
+        khttp.delete("$node/ocpi/2.2/credentials",
+                headers = mapOf("Authorization" to "Token $tokenC"))
+    }
+
     fun urlBuilder(path: String): String {
         return "http://localhost:$port$path"
     }

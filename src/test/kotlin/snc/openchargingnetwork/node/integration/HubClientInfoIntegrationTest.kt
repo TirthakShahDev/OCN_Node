@@ -2,19 +2,22 @@ package snc.openchargingnetwork.node.integration
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.web3j.crypto.Credentials
 import snc.openchargingnetwork.node.models.ocpi.*
 import java.lang.Thread.sleep
+import java.util.concurrent.TimeUnit
 
 
 class HubClientInfoIntegrationTest {
 
     private lateinit var networkComponents: NetworkComponents
-    private lateinit var cpo1: CpoTestCase
-    private lateinit var cpo2: CpoTestCase
-    private lateinit var msp: MspTestCase
+    private lateinit var cpo1: TestCpo
+    private lateinit var cpo2: TestCpo
+    private lateinit var msp: TestMsp
 
     private val hubClientInfoParams = HubClientInfoParams(stillAliveEnabled = false, stillAliveRate = 2000)
 
@@ -33,17 +36,26 @@ class HubClientInfoIntegrationTest {
     }
 
     /**
-     * Tests that registered clients trigger hubClientInfo notifications
+     * Tests that new parties and deleted parties trigger hubClientInfo notifications
      */
     @Test
-    fun hubClientInfo_clientRegisteredPushNotification() {
-        // The assumption is that the MSP is registered after cpoServer2, so cpoServer2 is notified of this
-        assertThat(cpo2.server.hubClientInfoNotificationCount).isEqualTo(1)
+    fun hubClientInfo_partyRegisteredNotification() {
+        val newCpoDefinition = PartyDefinition(
+                nodeNumber = 1,
+                port = 8102,
+                party = BasicRole("CPC", "CH"),
+                credentials = Credentials.create("0x82d052c865f5763aad42add438569276c00d3d88a2d062d36b2bae914d58b8c8"))
+        val newCpo = setUpCpo(
+                newCpoDefinition,
+                networkComponents.nodes.first{ d -> d.definition.nodeNumber == newCpoDefinition.nodeNumber }.definition,
+                networkComponents.registry)
 
-        // The assumption is that cpoServer2 and MSP are registered after cpoServer1, so cpoServer1 is notified of this
-        assertThat(cpo1.server.hubClientInfoNotificationCount).isEqualTo(2)
-        val cpo2Role = cpo2.party
-        assertThat(cpo1.server.hubClientInfoStatuses[cpo2Role]).isEqualTo(ConnectionStatus.CONNECTED)
+        // The assumption is that cpo1 is also connected to node1
+        await().atMost(2, TimeUnit.SECONDS).until{cpo1.server.hubClientInfoStatuses.containsKey(newCpoDefinition.party)}
+        assertThat(cpo1.server.hubClientInfoStatuses[newCpoDefinition.party]).isEqualTo(ConnectionStatus.CONNECTED)
+
+        newCpo.server.deleteCredentials()
+        await().atMost(2, TimeUnit.SECONDS).until{cpo1.server.hubClientInfoStatuses[newCpoDefinition.party] == ConnectionStatus.SUSPENDED}
     }
 
     /**

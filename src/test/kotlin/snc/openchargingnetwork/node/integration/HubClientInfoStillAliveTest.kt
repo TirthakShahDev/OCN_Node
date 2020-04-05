@@ -5,7 +5,6 @@ import org.awaitility.Awaitility.*
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import snc.openchargingnetwork.node.integration.parties.CpoServer
 import snc.openchargingnetwork.node.models.ocpi.*
 import java.util.concurrent.TimeUnit
 
@@ -13,8 +12,8 @@ import java.util.concurrent.TimeUnit
 class HubClientInfoStillAliveTest {
 
     private lateinit var networkComponents: NetworkComponents
-    private lateinit var cpo1: CpoTestCase
-    private lateinit var cpo2: CpoTestCase
+    private lateinit var cpo1: TestCpo
+    private lateinit var cpo2: TestCpo
 
     private val hubClientInfoParams = HubClientInfoParams(stillAliveEnabled = true, stillAliveRate = 2000)
 

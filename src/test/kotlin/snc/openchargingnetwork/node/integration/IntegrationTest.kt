@@ -20,8 +20,8 @@ class IntegrationTest {
 
     private lateinit var networkComponents: NetworkComponents
     private lateinit var mspServer: MspServer
-    private lateinit var msp: MspTestCase
-    private lateinit var cpos: List<CpoTestCase>
+    private lateinit var msp: TestMsp
+    private lateinit var cpos: List<TestCpo>
 
     private val hubClientInfoParams = HubClientInfoParams(stillAliveEnabled = false, stillAliveRate = 1000)
 
@@ -169,7 +169,7 @@ class IntegrationTest {
             // check signed by correct entity (sender's node is the modifier of the location header)
             assertThat(sig.signatory.checksum()).isEqualTo(cpo.operator.checksum())
             assertThat(sig.rewrites.size).isEqualTo(1)
-            assertThat(sig.rewrites[0].signatory.checksum()).isEqualTo(msp.credentials.address.checksum())
+            assertThat(sig.rewrites[0].signatory.checksum()).isEqualTo(msp.address.checksum())
 
             // verify signature matches response
             val verifyResult = sig.verify(signedValues)
