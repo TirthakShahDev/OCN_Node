@@ -21,10 +21,6 @@ fun coerceToJson(obj: Any): Any {
     return objectMapper.readValue(objectMapper.writeValueAsString(obj))
 }
 
-fun String.checksum(): String {
-    return Keys.toChecksumAddress(this)
-}
-
 fun Credentials.privateKey(): String {
     return ecKeyPair.privateKey.toString(16)
 }

@@ -12,6 +12,7 @@ import snc.openchargingnetwork.node.data.exampleCDR
 import snc.openchargingnetwork.node.data.exampleLocation1
 import snc.openchargingnetwork.node.integration.parties.MspServer
 import snc.openchargingnetwork.node.models.ocpi.*
+import snc.openchargingnetwork.node.tools.checksum
 import snc.openchargingnetwork.node.tools.extractNextLink
 import java.lang.Thread.sleep
 

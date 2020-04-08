@@ -159,3 +159,21 @@ class OcnRulesListEntity(
 
         @Id @GeneratedValue val id: Long? = null
 )
+
+/**
+ * Store a planned role from the OCN Registry
+ */
+@Entity
+@Table(name = "planned_roles")
+class PlannedRoleEntity(
+
+        @AttributeOverrides(
+                AttributeOverride(name = "id", column = Column(name ="sender_id")),
+                AttributeOverride(name = "country", column = Column(name ="sender_country"))
+        )
+        @Embedded
+        val party: BasicRole,
+
+        @Enumerated(EnumType.STRING) var role: Role,
+        var lastUpdated: String = getTimestamp(),
+        @Id @GeneratedValue var id: Long? = null)

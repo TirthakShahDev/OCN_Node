@@ -21,6 +21,7 @@ import snc.openchargingnetwork.node.models.entities.*
 import snc.openchargingnetwork.node.models.ocpi.BasicRole
 import snc.openchargingnetwork.node.models.ocpi.ConnectionStatus
 import snc.openchargingnetwork.node.models.ocpi.InterfaceRole
+import snc.openchargingnetwork.node.models.ocpi.Role
 
 interface PlatformRepository: CrudRepository<PlatformEntity, Long> {
     fun existsByAuth_TokenA(tokenA: String?): Boolean
@@ -58,4 +59,9 @@ interface OcnRulesListRepository: CrudRepository<OcnRulesListEntity, Long> {
     fun findAllByPlatformID(platformID: Long?): Iterable<OcnRulesListEntity>
     fun deleteByPlatformID(platformID: Long?)
     fun deleteByPlatformIDAndCounterparty(platformID: Long?, party: BasicRole)
+}
+
+interface PlannedRoleRepository: CrudRepository<PlannedRoleEntity, Long> {
+    fun existsByPartyAndRoleAllIgnoreCase(party: BasicRole, role: Role): Boolean
+    fun deleteByPartyAndRoleAllIgnoreCase(party: BasicRole, role: Role)
 }

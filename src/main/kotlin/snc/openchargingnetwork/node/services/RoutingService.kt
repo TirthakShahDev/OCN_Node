@@ -17,7 +17,6 @@
 package snc.openchargingnetwork.node.services
 
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.Keys
@@ -26,7 +25,7 @@ import snc.openchargingnetwork.node.config.NodeProperties
 import snc.openchargingnetwork.node.models.OcnHeaders
 import snc.openchargingnetwork.node.models.OcnMessageHeaders
 import snc.openchargingnetwork.node.models.Receiver
-import snc.openchargingnetwork.node.models.RegistryPartyDetails
+import snc.openchargingnetwork.node.models.RegistryPartyDetailsBasic
 import snc.openchargingnetwork.node.models.entities.*
 import snc.openchargingnetwork.node.models.entities.OcnRules
 import snc.openchargingnetwork.node.models.exceptions.*
@@ -35,7 +34,6 @@ import snc.openchargingnetwork.node.models.ocpi.InterfaceRole
 import snc.openchargingnetwork.node.models.ocpi.ModuleID
 import snc.openchargingnetwork.node.models.ocpi.OcpiRequestVariables
 import snc.openchargingnetwork.node.repositories.*
-import snc.openchargingnetwork.node.tools.extractNextLink
 import snc.openchargingnetwork.node.tools.extractToken
 import snc.openchargingnetwork.node.tools.generateUUIDv4Token
 import snc.openchargingnetwork.node.tools.urlJoin
@@ -133,9 +131,9 @@ class RoutingService(private val platformRepo: PlatformRepository,
     /**
      * Only returns party and operator addresses so far; add as needed
      */
-    fun getPartyDetails(party: BasicRole): RegistryPartyDetails {
+    fun getPartyDetails(party: BasicRole): RegistryPartyDetailsBasic {
         val result = registry.getPartyDetailsByOcpi(party.country.toByteArray(), party.id.toByteArray()).sendAsync().get()
-        return RegistryPartyDetails(address = result.component1(), operator = result.component5())
+        return RegistryPartyDetailsBasic(address = result.component1(), operator = result.component5())
     }
 
 

@@ -45,7 +45,11 @@ class NodeProperties {
         }
     }
 
-    lateinit var stillAliveRate: String
+    var stillAliveRate: String = "900000" // defaults to 15 minutes
 
     var stillAliveEnabled: Boolean = false
+
+    var plannedPartySearchRate: String = "3600000" // defaults to 1 hour
+
+    var plannedPartySearchEnabled: Boolean = false
 }

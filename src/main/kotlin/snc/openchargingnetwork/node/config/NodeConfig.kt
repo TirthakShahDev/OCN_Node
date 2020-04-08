@@ -28,6 +28,7 @@ import org.web3j.tx.gas.StaticGasProvider
 import snc.openchargingnetwork.node.repositories.*
 import snc.openchargingnetwork.contracts.Registry
 import snc.openchargingnetwork.node.scheduledTasks.HubClientInfoStillAliveCheck
+import snc.openchargingnetwork.node.scheduledTasks.PlannedPartySearch
 
 
 @Configuration
@@ -44,7 +45,7 @@ open class NodeConfig(private val properties: NodeProperties) {
                             proxyResourceRepository: ProxyResourceRepository) = ApplicationRunner {}
 
     @Bean
-    fun Registry(): Registry {
+    fun registry(): Registry {
         return Registry.load(
                 properties.web3.contracts.registry,
                 web3,
@@ -57,5 +58,11 @@ open class NodeConfig(private val properties: NodeProperties) {
     @ConditionalOnProperty(value = ["ocn.node.stillAliveEnabled"], matchIfMissing = false, havingValue = "true")
     fun hubClientInfoStillAliveCheck(platformRepo: PlatformRepository, httpService: snc.openchargingnetwork.node.services.HttpService): HubClientInfoStillAliveCheck {
         return HubClientInfoStillAliveCheck(httpService, platformRepo, properties)
+    }
+
+    @Bean
+    @ConditionalOnProperty(value = ["ocn.node.plannedPartySearchEnabled"], matchIfMissing = false, havingValue = "true")
+    fun plannedPartySearch(registry: Registry, roleRepo: RoleRepository, plannedRoleRepo: PlannedRoleRepository, properties: NodeProperties): PlannedPartySearch {
+        return PlannedPartySearch(registry, roleRepo, plannedRoleRepo, properties)
     }
 }

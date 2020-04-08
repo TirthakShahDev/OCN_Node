@@ -113,7 +113,10 @@ fun setUpNode(definition: NodeDefinition, registry: Registry): OcnNode {
                     "--ocn.node.web3.contracts.registry=$registryAddress",
                     "--ocn.node.signatures=${definition.signatures}",
                     "--ocn.node.stillAliveEnabled=${definition.hubClientInfoParams.stillAliveEnabled}",
-                    "--ocn.node.stillAliveRate=${definition.hubClientInfoParams.stillAliveRate}")
+                    "--ocn.node.stillAliveRate=${definition.hubClientInfoParams.stillAliveRate}",
+                    // TODO: PlannedPartySearchTest
+                    "--ocn.node.plannedPartySearchEnabled=${false}",
+                    "--ocn.node.plannedPartySearchRate=${1000}")
     getRegistryInstance(definition.credentials, registryAddress).setNode(domain).sendAsync().get()
     return OcnNode(definition, appContext)
 }
