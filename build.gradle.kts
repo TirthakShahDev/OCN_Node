@@ -1,4 +1,4 @@
-import org.asciidoctor.gradle.AsciidoctorTask
+// import org.asciidoctor.gradle.AsciidoctorTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
@@ -10,7 +10,7 @@ plugins {
     kotlin("plugin.spring") version "1.3.61"
     kotlin("plugin.allopen") version "1.3.61"
     kotlin("kapt") version "1.3.61"
-    id("org.asciidoctor.convert") version "1.5.9.2"
+    // id("org.asciidoctor.convert") version "1.6.0"
 }
 
 group = "snc.openchargingnetwork.node"
@@ -42,7 +42,7 @@ dependencies {
     implementation("org.postgresql:postgresql:42.2.6")
     runtimeOnly("com.h2database:h2")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
-    asciidoctor("org.springframework.restdocs:spring-restdocs-asciidoctor:2.0.3.RELEASE")
+    // asciidoctor("org.springframework.restdocs:spring-restdocs-asciidoctor")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
@@ -73,7 +73,7 @@ tasks.withType<KotlinCompile> {
 
 val test: Test by tasks
 test.apply {
-    dependsOn("unitTest", "integrationTest")
+    // dependsOn("unitTest", "integrationTest")
     outputs.dir(snippetsDir)
 }
 
@@ -99,17 +99,17 @@ tasks.register<Exec>("ganache") {
             "--gasLimit=10000000"))
 }
 
-val asciidoctor by tasks.getting(AsciidoctorTask::class) {
-    inputs.dir(snippetsDir)
-    dependsOn(test)
-}
+// val asciidoctor by tasks.getting(AsciidoctorTask::class) {
+//     inputs.dir(snippetsDir)
+//     dependsOn(test)
+// }
 
 tasks {
     "bootJar"(BootJar::class) {
-        dependsOn(asciidoctor)
-        from("${asciidoctor.get().outputDir}/html5") {
-            into("static/docs")
-        }
+        // dependsOn(asciidoctor)
+        // from("${asciidoctor.get().outputDir}/html5") {
+        //     into("static/docs")
+        // }
     }
 }
 
